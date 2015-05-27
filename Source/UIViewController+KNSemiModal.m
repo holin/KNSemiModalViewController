@@ -220,6 +220,10 @@ const struct KNSemiModalOptionKeys KNSemiModalOptionKeys = {
         // Calulate all frames
         CGFloat semiViewHeight = view.frame.size.height;
         CGRect vf = target.bounds;
+        if ([target isKindOfClass:[UIScrollView class]]) {
+            UIScrollView *scrollView = (UIScrollView *)target;
+            vf.size.height += scrollView.contentOffset.y;
+        }
         CGRect semiViewFrame;
         if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
             // We center the view and mantain aspect ration
@@ -349,12 +353,17 @@ const struct KNSemiModalOptionKeys KNSemiModalOptionKeys = {
 	}
 	
     [UIView animateWithDuration:duration animations:^{
+        CGRect vf = target.bounds;
+        if ([target isKindOfClass:[UIScrollView class]]) {
+            UIScrollView *scrollView = (UIScrollView *)target;
+            vf.size.height += scrollView.contentOffset.y;
+        }
         if (transitionStyle == KNSemiModalTransitionStyleSlideUp) {
             if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPad){
                 // As the view is centered, we perform a vertical translation
-                modal.frame = CGRectMake((target.bounds.size.width - modal.frame.size.width) / 2.0, target.bounds.size.height, modal.frame.size.width, modal.frame.size.height);
+                modal.frame = CGRectMake((vf.size.width - modal.frame.size.width) / 2.0, vf.size.height, modal.frame.size.width, modal.frame.size.height);
             } else {
-                modal.frame = CGRectMake(0, target.bounds.size.height, modal.frame.size.width, modal.frame.size.height);
+                modal.frame = CGRectMake(0, vf.size.height, modal.frame.size.width, modal.frame.size.height);
             }
         } else if (transitionStyle == KNSemiModalTransitionStyleFadeOut || transitionStyle == KNSemiModalTransitionStyleFadeInOut) {
             modal.alpha = 0.0;
