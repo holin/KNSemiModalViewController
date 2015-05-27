@@ -127,11 +127,18 @@ const struct KNSemiModalOptionKeys KNSemiModalOptionKeys = {
 	screenshotContainer.hidden = YES; // screenshot without the overlay!
 	semiView.hidden = YES;
 	UIGraphicsBeginImageContextWithOptions(target.bounds.size, YES, [[UIScreen mainScreen] scale]);
-    if ([target respondsToSelector:@selector(drawViewHierarchyInRect:afterScreenUpdates:)]) {
-        [target drawViewHierarchyInRect:target.bounds afterScreenUpdates:YES];
-    } else {
-        [target.layer renderInContext:UIGraphicsGetCurrentContext()];
+    
+    CGContextRef ctx = UIGraphicsGetCurrentContext();
+    
+    if ([target isKindOfClass:[UIScrollView class]]) {
+        UIScrollView *scrollView = (UIScrollView *)target;
+        //  KEY: need to translate the context down to the current visible portion of the tablview
+        // http://stackoverflow.com/questions/6402393/screenshot-from-a-uitableview
+        CGContextTranslateCTM(ctx, 0, -scrollView.contentOffset.y);
     }
+    
+    [target.layer renderInContext:ctx];
+
     UIImage *image = UIGraphicsGetImageFromCurrentImageContext();
     UIGraphicsEndImageContext();
 	screenshotContainer.hidden = NO;
